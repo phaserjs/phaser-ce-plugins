@@ -273,49 +273,62 @@ Phaser.Plugin.TilemapWalker.prototype = {
 
         //  For now we assume that center = bottom middle tile
 
-        if (this.facing === Phaser.Tilemap.NORTH)
+        if (center)
         {
             startX = this.location.x - hw;
             endX = this.location.x + hw;
             incX = 1;
 
-            //  bottom middle align
-            startY = this.location.y - (height - 1);
-            endY = this.location.y;
-            incY = 1;
-        }
-        else if (this.facing === Phaser.Tilemap.EAST)
-        {
-            startX = this.location.x;
-            endX = this.location.x + (width - 1);
-            incX = 1;
-
-            //  bottom middle align
             startY = this.location.y - hh;
             endY = this.location.y + hh;
             incY = 1;
         }
-        else if (this.facing === Phaser.Tilemap.SOUTH)
+        else
         {
-            startX = this.location.x - hw;
-            endX = this.location.x + hw;
-            incX = 1;
+            if (this.facing === Phaser.Tilemap.NORTH)
+            {
+                startX = this.location.x - hw;
+                endX = this.location.x + hw;
+                incX = 1;
 
-            //  bottom middle align
-            startY = this.location.y;
-            endY = this.location.y + (height - 1);
-            incY = 1;
-        }
-        else if (this.facing === Phaser.Tilemap.WEST)
-        {
-            startX = this.location.x - (width - 1);
-            endX = this.location.x;
-            incX = 1;
+                //  bottom middle align
+                startY = this.location.y - (height - 1);
+                endY = this.location.y;
+                incY = 1;
+            }
+            else if (this.facing === Phaser.Tilemap.EAST)
+            {
+                startX = this.location.x;
+                endX = this.location.x + (width - 1);
+                incX = 1;
 
-            //  bottom middle align
-            startY = this.location.y - hh;
-            endY = this.location.y + hh;
-            incY = 1;
+                //  bottom middle align
+                startY = this.location.y - hh;
+                endY = this.location.y + hh;
+                incY = 1;
+            }
+            else if (this.facing === Phaser.Tilemap.SOUTH)
+            {
+                startX = this.location.x - hw;
+                endX = this.location.x + hw;
+                incX = 1;
+
+                //  bottom middle align
+                startY = this.location.y;
+                endY = this.location.y + (height - 1);
+                incY = 1;
+            }
+            else if (this.facing === Phaser.Tilemap.WEST)
+            {
+                startX = this.location.x - (width - 1);
+                endX = this.location.x;
+                incX = 1;
+
+                //  bottom middle align
+                startY = this.location.y - hh;
+                endY = this.location.y + hh;
+                incY = 1;
+            }
         }
 
         var output = [];
@@ -336,7 +349,7 @@ Phaser.Plugin.TilemapWalker.prototype = {
                 else
                 {
                     //  out of bounds, so block it off
-                    row.push(2);
+                    row.push(0);
                 }
             }
 
@@ -362,6 +375,89 @@ Phaser.Plugin.TilemapWalker.prototype = {
         console.log(printMatrix(output));
 
         return output;
+
+    },
+
+    getMiniMap: function (width, height) {
+
+        var startX;
+        var startX;
+        var endX;
+        var endY;
+        var diff = 0;
+
+        var hw = Math.floor(width / 2);
+        var hh = Math.floor(height / 2);
+
+        startX = this.location.x - hw;
+        endX = this.location.x + hw;
+
+        startY = this.location.y - hh;
+        endY = this.location.y + hh;
+
+        //  Bounds
+        if (startX < 0)
+        {
+            endX += Math.abs(startX);
+            startX = 0;
+        }
+
+        if (endX > this.map.width)
+        {
+            diff = endX - this.map.width;
+            endX = this.map.width;
+            startX -= diff;
+        }
+
+        if (startY < 0)
+        {
+            endY += Math.abs(startY);
+            startY = 0;
+        }
+
+        if (endY > this.map.height)
+        {
+            diff = endY - this.map.height;
+            endY = this.map.height;
+            startY -= diff;
+        }
+
+        var output = [];
+        var row = [];
+        var walkerPosition = { x: 0, y: 0 };
+
+        for (var y = startY; y < endY; y++)
+        {
+            row = [];
+
+            for (var x = startX; x < endX; x++)
+            {
+                //  Walker?
+                if (x === this.location.x && y === this.location.y)
+                {
+                    walkerPosition.x = row.length;
+                    walkerPosition.y = output.length;
+                }
+
+                var tile = this.map.getTile(x, y, this.locationLayer, true);
+
+                if (tile)
+                {
+                    row.push(tile.index);
+                }
+                else
+                {
+                    //  out of bounds, so block it off
+                    row.push(0);
+                }
+            }
+
+            output.push(row);
+        }
+
+        // console.log(printMatrix(output));
+
+        return { walker: walkerPosition, tiles: output };
 
     },
 
