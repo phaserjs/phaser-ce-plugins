@@ -28,29 +28,39 @@ Phaser.Plugin.VirtualJoystick = function (game, parent) {
     this.deltaX = 0;
     this.deltaY = 0;
     this.speed = 0;
+
+    this.pointer = null;
+
+    this.callbackID = -1;
     
 };
 
 Phaser.Plugin.VirtualJoystick.prototype = Object.create(Phaser.Plugin.prototype);
 Phaser.Plugin.VirtualJoystick.prototype.constructor = Phaser.Plugin.VirtualJoystick;
 
-Phaser.Plugin.VirtualJoystick.prototype.init = function (x, y, diameter, limit, baseColor, stickColor) {
+Phaser.Plugin.VirtualJoystick.prototype.init = function (x, y, baseDiameter, stickDiameter, limit, baseColor, stickColor) {
 
-    if (typeof diameter === 'undefined') { diameter = 80; }
-    if (typeof limit === 'undefined') { limit = Math.floor(diameter / 2); }
+    if (typeof baseDiameter === 'undefined') { baseDiameter = 80; }
+    if (typeof stickDiameter === 'undefined') { stickDiameter = 60; }
+    if (typeof limit === 'undefined') { limit = Math.floor(baseDiameter / 2); }
     if (typeof baseColor === 'undefined') { baseColor = 'rgba(255, 0, 0, 0.5)'; }
-    if (typeof stickColor === 'undefined') { stickColor = 'rgba(0, 255, 0, 1)'; }
+    if (typeof stickColor === 'undefined') { stickColor = 'rgba(0, 255, 0, 0.7)'; }
 
     this.x = x;
     this.y = y;
+    this.isDragging = false;
 
-    var radius = Math.floor(diameter / 2);
-    var nr = radius - 4;
+    this.limit = limit;
+    this.limitPoint = new Phaser.Point(x, y);
+    this.location = new Phaser.Point(x, y);
 
-    this.baseCircle = new Phaser.Circle(x, y, diameter);
+    var radius = Math.floor(baseDiameter / 2);
+    var nr = Math.floor(stickDiameter / 2);
 
-    this.baseBMD = this.game.make.bitmapData(diameter, diameter);
-    this.nubBMD = this.game.make.bitmapData(nr * 2, nr * 2);
+    this.baseCircle = new Phaser.Circle(x, y, baseDiameter);
+
+    this.baseBMD = this.game.make.bitmapData(baseDiameter, baseDiameter);
+    this.nubBMD = this.game.make.bitmapData(stickDiameter, stickDiameter);
 
     this.baseBMD.circle(radius, radius, radius, baseColor);
     this.nubBMD.circle(nr, nr, nr, stickColor);
@@ -59,34 +69,75 @@ Phaser.Plugin.VirtualJoystick.prototype.init = function (x, y, diameter, limit, 
     this.base = this.game.make.sprite(x, y, this.baseBMD);
     this.base.anchor.set(0.5);
 
-    //  Nub
+    //  Nub (stick)
     this.nub = this.game.make.sprite(x, y, this.nubBMD);
     this.nub.anchor.set(0.5);
 
     this.nub.inputEnabled = true;
-
     this.nub.events.onInputDown.add(this.startDrag, this);
     this.nub.events.onInputUp.add(this.stopDrag, this);
+
+};
+
+Phaser.Plugin.VirtualJoystick.prototype.start = function () {
 
     this.game.stage.addChild(this.base);
     this.game.stage.addChild(this.nub);
 
-    this.game.input.addMoveCallback(this.move, this);
+    if (this.callbackID > -1)
+    {
+        this.game.input.deleteMoveCallback(this.callbackID);
+    }
+    
+    this.callbackID = this.game.input.addMoveCallback(this.move, this);
 
     this.isDragging = false;
 
     this.distance = 0;
     this.speed = 0;
     this.force = 0;
-    this.limit = limit;
-    this.limitPoint = new Phaser.Point(x, y);
-    this.location = new Phaser.Point();
+
+    this.deltaX = 0;
+    this.deltaY = 0;
+
+    this.nub.x = this.base.x;
+    this.nub.y = this.base.y;
+
+    this.base.visible = true;
+    this.nub.visible = true;
+
+    this.limitPoint.set(this.base.x, this.base.y);
+    this.location.set(this.base.x, this.base.y);
+
+};
+
+Phaser.Plugin.VirtualJoystick.prototype.stop = function () {
+
+    // if (this.nub.parent === null || this.base.parent === null)
+    // {
+        // return;
+    // }
+
+    this.base.visible = false;
+    this.nub.visible = false;
+
+    this.nub.x = this.base.x;
+    this.nub.y = this.base.y;
+
+    // this.nub.input.enabled = false;
+
+    // this.game.stage.removeChild(this.base);
+    // this.game.stage.removeChild(this.nub);
+
+    // this.game.input.deleteMoveCallback(this.callbackID);
 
 };
 
 Phaser.Plugin.VirtualJoystick.prototype.startDrag = function (nub, pointer) {
 
     this.isDragging = true;
+
+    this.pointer = pointer;
 
     this.location.set(pointer.x, pointer.y);
 
@@ -100,6 +151,8 @@ Phaser.Plugin.VirtualJoystick.prototype.startDrag = function (nub, pointer) {
 };
 
 Phaser.Plugin.VirtualJoystick.prototype.stopDrag = function (nub, pointer) {
+
+    console.log('stopDrag');
 
     this.isDragging = false;
 
@@ -177,4 +230,10 @@ Phaser.Plugin.VirtualJoystick.prototype.setVelocity = function (sprite, minSpeed
 };
 
 Phaser.Plugin.VirtualJoystick.prototype.update = function () {
+
+    if (this.isDragging && (!this.pointer.isDown || !this.pointer.withinGame))
+    {
+        this.stopDrag();
+    }
+
 };
