@@ -372,7 +372,7 @@ Phaser.Plugin.TilemapWalker.prototype = {
         }
 
         // console.log('rotate');
-        console.log(printMatrix(output));
+        // console.log(printMatrix(output));
 
         return output;
 

@@ -34,10 +34,12 @@ Phaser.Plugin.VirtualJoystick = function (game, parent) {
 Phaser.Plugin.VirtualJoystick.prototype = Object.create(Phaser.Plugin.prototype);
 Phaser.Plugin.VirtualJoystick.prototype.constructor = Phaser.Plugin.VirtualJoystick;
 
-Phaser.Plugin.VirtualJoystick.prototype.init = function (x, y, diameter, limit) {
+Phaser.Plugin.VirtualJoystick.prototype.init = function (x, y, diameter, limit, baseColor, stickColor) {
 
     if (typeof diameter === 'undefined') { diameter = 80; }
     if (typeof limit === 'undefined') { limit = Math.floor(diameter / 2); }
+    if (typeof baseColor === 'undefined') { baseColor = 'rgba(255, 0, 0, 0.5)'; }
+    if (typeof stickColor === 'undefined') { stickColor = 'rgba(0, 255, 0, 1)'; }
 
     this.x = x;
     this.y = y;
@@ -50,15 +52,15 @@ Phaser.Plugin.VirtualJoystick.prototype.init = function (x, y, diameter, limit) 
     this.baseBMD = this.game.make.bitmapData(diameter, diameter);
     this.nubBMD = this.game.make.bitmapData(nr * 2, nr * 2);
 
-    this.baseBMD.circle(radius, radius, radius, 'rgb(255, 0, 0)');
-    this.nubBMD.circle(nr, nr, nr, 'rgb(0, 255, 0)');
+    this.baseBMD.circle(radius, radius, radius, baseColor);
+    this.nubBMD.circle(nr, nr, nr, stickColor);
 
     //  Base
-    this.base = this.game.add.sprite(x, y, this.baseBMD);
+    this.base = this.game.make.sprite(x, y, this.baseBMD);
     this.base.anchor.set(0.5);
 
     //  Nub
-    this.nub = this.game.add.sprite(x, y, this.nubBMD);
+    this.nub = this.game.make.sprite(x, y, this.nubBMD);
     this.nub.anchor.set(0.5);
 
     this.nub.inputEnabled = true;
@@ -66,8 +68,10 @@ Phaser.Plugin.VirtualJoystick.prototype.init = function (x, y, diameter, limit) 
     this.nub.events.onInputDown.add(this.startDrag, this);
     this.nub.events.onInputUp.add(this.stopDrag, this);
 
-    //  Need to find a way to not hog this callback
-    this.game.input.setMoveCallback(this.move, this);
+    this.game.stage.addChild(this.base);
+    this.game.stage.addChild(this.nub);
+
+    this.game.input.addMoveCallback(this.move, this);
 
     this.isDragging = false;
 
@@ -75,20 +79,23 @@ Phaser.Plugin.VirtualJoystick.prototype.init = function (x, y, diameter, limit) 
     this.speed = 0;
     this.force = 0;
     this.limit = limit;
-    this.limitPoint = new Phaser.Point();
-
+    this.limitPoint = new Phaser.Point(x, y);
     this.location = new Phaser.Point();
 
-}
+};
 
 Phaser.Plugin.VirtualJoystick.prototype.startDrag = function (nub, pointer) {
 
     this.isDragging = true;
 
     this.location.set(pointer.x, pointer.y);
+
     this.distance = Phaser.Point.distance(this.base, this.location, true);
     this.angle = this.game.math.wrapAngle(this.location.angle(this.base, true) + 180);
     this.force = this.game.math.percent(this.distance, this.limit);
+
+    this.deltaX = Math.cos(this.game.math.degToRad(this.angle));
+    this.deltaY = Math.sin(this.game.math.degToRad(this.angle));
 
 };
 
@@ -102,6 +109,9 @@ Phaser.Plugin.VirtualJoystick.prototype.stopDrag = function (nub, pointer) {
 
     this.nub.x = this.base.x;
     this.nub.y = this.base.y;
+
+    this.deltaX = 0;
+    this.deltaY = 0;
     
     this.limitPoint.set(this.base.x, this.base.y);
 
@@ -117,9 +127,7 @@ Phaser.Plugin.VirtualJoystick.prototype.move = function (pointer, x, y) {
     this.location.set(x, y);
 
     this.distance = Phaser.Point.distance(this.base, this.location, true);
-
     this.angle = this.game.math.wrapAngle(this.location.angle(this.base, true) + 180);
-
     this.force = this.game.math.percent(this.distance, this.limit);
 
     if (this.distance < this.limit)
@@ -132,6 +140,9 @@ Phaser.Plugin.VirtualJoystick.prototype.move = function (pointer, x, y) {
     }
 
     this.nub.position.set(this.limitPoint.x, this.limitPoint.y);
+
+    this.deltaX = Math.cos(this.game.math.degToRad(this.angle));
+    this.deltaY = Math.sin(this.game.math.degToRad(this.angle));
 
 };
 
@@ -158,7 +169,7 @@ Phaser.Plugin.VirtualJoystick.prototype.setVelocity = function (sprite, minSpeed
     {
         var speed = (maxSpeed - minSpeed) * this.force;
 
-        sprite.body.velocity.set((Math.cos(this.game.math.degToRad(this.angle)) * speed), (Math.sin(this.game.math.degToRad(this.angle)) * speed));
+        sprite.body.velocity.set(this.deltaX * speed, this.deltaY * speed);
     }
 
     return sprite;
@@ -166,20 +177,4 @@ Phaser.Plugin.VirtualJoystick.prototype.setVelocity = function (sprite, minSpeed
 };
 
 Phaser.Plugin.VirtualJoystick.prototype.update = function () {
-
-};
-
-Phaser.Plugin.VirtualJoystick.prototype.render = function () {
-
-    this.game.debug.text('force: ' + this.force, 32, 32);
-    // this.game.debug.text(this.distance, 32, 32);
-    // this.game.debug.text(this.angle, 132, 32);
-
-    // this.game.debug.text('x: ' + this.location.x + ' y: ' + this.location.y, 32, 64);
-    // this.game.debug.text('x: ' + this.limitPoint.x + ' y: ' + this.limitPoint.y, 32, 64);
-    // this.game.debug.text('x: ' + this.prev.x + ' y: ' + this.prev.y, 32, 64);
-    // this.game.debug.text(Phaser.Point.distance(this.base, this.prev, true), 32, 96);
-
-    this.game.debug.geom(this.limitPoint, 'rgb(255,255,0)');
-
 };
