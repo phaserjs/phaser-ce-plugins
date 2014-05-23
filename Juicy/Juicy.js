@@ -441,7 +441,7 @@ Phaser.Plugin.Juicy.prototype.update = function () {
 };
 
 // for browserify compatibility
-if(module && module.exports) {
+if(typeof module === 'object' && module.exports) {
   module.exports = Phaser.Plugin.Juicy;
 }
 
