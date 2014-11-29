@@ -18,6 +18,9 @@ Phaser.Plugin.Webcam = function (game, parent) {
     this.video = document.createElement('video');
     this.video.autoplay = true;
 
+    this.onConnect = new Phaser.Signal();
+    this.onError = new Phaser.Signal();
+
 };
 
 Phaser.Plugin.Webcam.prototype = Object.create(Phaser.Plugin.prototype);
@@ -52,11 +55,13 @@ Phaser.Plugin.Webcam.prototype.connectCallback = function (stream) {
 
     this.video.src = window.URL.createObjectURL(this.stream);
 
+    this.onConnect.dispatch(this.video);
+
 };
 
-Phaser.Plugin.Webcam.prototype.errorCallback = function (e) {
+Phaser.Plugin.Webcam.prototype.errorCallback = function (event) {
 
-    console.log('Video Stream rejected', e);
+    this.onError.dispatch(event);
 
 };
 
