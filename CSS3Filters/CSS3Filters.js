@@ -2,6 +2,7 @@
 * Phaser - Display - CSS3Filters
 *
 * Allows for easy addition and modification of CSS3 Filters on DOM objects (typically the Game.Stage.canvas).
+* @class Phaser.Plugin.CSS3Filters
 */
 
 Phaser.Plugins.CSS3Filters = function (parent) {

@@ -2,11 +2,10 @@
 /**
 * A collection of methods useful for manipulating and comparing colors.
 *
-* @class        ColorHarmony
+* @class        Phaser.Plugin.ColorHarmony
 * @author       Richard Davey <rich@photonstorm.com>
 * @copyright    2013 Photon Storm Ltd.
 * @license      https://github.com/photonstorm/phaser/blob/master/license.txt  MIT License
-* @module       Phaser
 */
 
 Phaser.Plugins.ColorHarmony.prototype = {
@@ -16,7 +15,7 @@ Phaser.Plugins.ColorHarmony.prototype = {
     * <p>A complementary hue is one directly opposite the color given on the color wheel</p>
     * <p>Value returned in 0xAARRGGBB format with Alpha set to 255.</p>
     *
-    * @method getComplementHarmony
+    * @method Phaser.Plugin.ColorHarmony#getComplementHarmony
     * @param {Number} color The color to base the harmony on.
     * @return {Number} 0xAARRGGBB format color value.
     */
@@ -33,7 +32,7 @@ Phaser.Plugins.ColorHarmony.prototype = {
     * <p>An Analogous harmony are hues adjacent to each other on the color wheel</p>
     * <p>Values returned in 0xAARRGGBB format with Alpha set to 255.</p>
     *
-    * @method getAnalogousHarmony
+    * @method Phaser.Plugin.ColorHarmony#getAnalogousHarmony
     * @param {Number} color The color to base the harmony on.
     * @param {Number} threshold Control how adjacent the colors will be (default +- 30 degrees)
     * @return {Object} Object containing 3 properties: color1 (the original color), color2 (the warmer analogous color) and color3 (the colder analogous color)
@@ -61,7 +60,7 @@ Phaser.Plugins.ColorHarmony.prototype = {
     * <p>A Split Complement harmony are the two hues on either side of the color's Complement</p>
     * <p>Values returned in 0xAARRGGBB format with Alpha set to 255.</p>
     *
-    * @method getSplitComplementHarmony
+    * @method Phaser.Plugin.ColorHarmony#getSplitComplementHarmony
     * @param {Number} color The color to base the harmony on
     * @param {Number} threshold Control how adjacent the colors will be to the Complement (default +- 30 degrees)
     * @return {Object} An object containing 3 properties: color1 (the original color), color2 (the warmer analogous color) and color3 (the colder analogous color)
@@ -90,7 +89,7 @@ Phaser.Plugins.ColorHarmony.prototype = {
     * <p>A Triadic harmony are 3 hues equidistant from each other on the color wheel</p>
     * <p>Values returned in 0xAARRGGBB format with Alpha set to 255.</p>
     *
-    * @method getTriadicHarmony
+    * @method Phaser.Plugin.ColorHarmony#getTriadicHarmony
     * @param {Number} color The color to base the harmony on.
     * @return {Object} An Object containing 3 properties: color1 (the original color), color2 and color3 (the equidistant colors)
     */

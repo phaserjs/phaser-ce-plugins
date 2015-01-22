@@ -53,7 +53,7 @@
  * Forces rendering during core game loop
  * Can be called independently or in tandem with above properties.
  * Should be called inside update function.
- *
+ * @class Phaser.Plugin.SaveCPU
  */
 
 /*global
