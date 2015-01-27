@@ -90,7 +90,7 @@ Phaser.Plugin.Juicy.ScreenFlash.prototype.constructor = Phaser.Plugin.Juicy.Scre
 *
 * @param {number} [maxAlpha=1] - The maximum alpha to flash the screen to
 * @param {number} [duration=100] - The duration of the flash in milliseconds
-* @method Phaser.Plugin.Juicy.ScreenFlash.prototype.flash
+* @method Phaser.Plugin.Juicy.ScreenFlash.flash
 * @memberof Phaser.Plugin.Juicy.ScreenFlash
 */
 Phaser.Plugin.Juicy.ScreenFlash.prototype.flash = function(maxAlpha, duration) {
@@ -305,7 +305,7 @@ Phaser.Plugin.Juicy.Trail.prototype.redrawSegments = function(offsetX, offsetY) 
 * @param {number} [duration=20] - The duration of the screen shake
 * @param {number} [strength=20] - The strength of the screen shake
 * 
-* @method Phaser.Plugin.Juicy#redrawSegment
+* @method Phaser.Plugin.Juicy#shake
 * @memberof Phaser.Plugin.Juicy
 */
 Phaser.Plugin.Juicy.prototype.shake = function (duration, strength) {
