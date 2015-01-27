@@ -85,7 +85,7 @@ Phaser.Plugin.Juicy.ScreenFlash.prototype = Object.create(Phaser.Sprite.prototyp
 Phaser.Plugin.Juicy.ScreenFlash.prototype.constructor = Phaser.Plugin.Juicy.ScreenFlash;
 
 
-/*
+/**
 * Flashes the screen
 *
 * @param {number} [maxAlpha=1] - The maximum alpha to flash the screen to
