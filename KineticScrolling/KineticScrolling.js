@@ -236,7 +236,6 @@
         if (this.settings.horizontalWheel) {
             this.autoScrollX = false;
 
-            this.targetWheelX = this.game.camera.x + delta;
             this.velocityWheelX += delta;
         }
 
