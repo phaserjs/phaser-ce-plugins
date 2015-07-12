@@ -3,14 +3,14 @@
  * @author       Juan Nicholls <jdnichollsc@hotmail.com>
  * @copyright    2015 Juan Nicholls - http://jdnichollsc.github.io/Phaser-Kinetic-Scrolling-Plugin/
  * @license      {@link http://opensource.org/licenses/MIT}
- * @version 0.1.1
+ * @version 0.1.2
  */
 
 (function (Phaser) {
     'use strict';
 
     /**
-    * Kinetic Scrolling is a Phaser plugin that allows vertical and horizontal scrolling with kinetic motion
+    * Kinetic Scrolling is a Phaser plugin that allows vertical and horizontal scrolling with kinetic motion.
     * It works with the Phaser.Camera
     *
     * @class Phaser.Plugin.KineticScrolling
@@ -41,12 +41,19 @@
         this.amplitudeX = 0;
         this.amplitudeY = 0;
 
+        this.directionWheel = 0;
+
+        this.velocityWheelX = 0;
+        this.velocityWheelY = 0;
 
         this.settings = {
-            timeConstant: 325, //really mimic iOS
             kineticMovement: true,
+            timeConstantScroll: 325, //really mimic iOS
             horizontalScroll: true,
-            verticalScroll: false
+            verticalScroll: false,
+            horizontalWheel: true,
+            verticalWheel: false,
+            deltaWheel: 40
         };
     };
 
@@ -57,11 +64,14 @@
     * Change Default Settings of the plugin
     *
     * @method Phaser.Plugin.KineticScrolling#configure
-    * @param {Object}  [options]                       - Object that contain properties to change the behavior of the plugin.
-    * @param {number}  [options.timeConstant=325]      - The rate of deceleration for the scrolling.
-    * @param {boolean} [options.kineticMovement=true]  - Enable or Disable the kinematic motion.
-    * @param {boolean} [options.horizontalScroll=true] - Enable or Disable the horizontal scrolling.
-    * @param {boolean} [options.verticalScroll=false]  - Enable or Disable the vertical scrolling.
+    * @param {Object}  [options] - Object that contain properties to change the behavior of the plugin.
+    * @param {number}  [options.timeConstantScroll=325] - The rate of deceleration for the scrolling.
+    * @param {boolean} [options.kineticMovement=true]   - Enable or Disable the kinematic motion.
+    * @param {boolean} [options.horizontalScroll=true]  - Enable or Disable the horizontal scrolling.
+    * @param {boolean} [options.verticalScroll=false]   - Enable or Disable the vertical scrolling.
+    * @param {boolean} [options.horizontalWheel=true]   - Enable or Disable the horizontal scrolling with mouse wheel.
+    * @param {boolean} [options.verticalWheel=false]    - Enable or Disable the vertical scrolling with mouse wheel.
+    * @param {number}  [options.deltaWheel=40]          - Delta increment of the mouse wheel.
     */
     Phaser.Plugin.KineticScrolling.prototype.configure = function (options) {
 
@@ -77,6 +87,8 @@
 
     /**
     * Start the Plugin.
+    *
+    * @method Phaser.Plugin.KineticScrolling#start
     */
     Phaser.Plugin.KineticScrolling.prototype.start = function () {
 
@@ -86,6 +98,7 @@
 
         this.game.input.onUp.add(this.endMove, this);
 
+        this.game.input.mouse.mouseWheelCallback = this.mouseWheel.bind(this);
     };
 
     /**
@@ -160,7 +173,7 @@
     };
 
     /**
-    * Event called after all the core subsystems (Input, Tweens, Sound, etc) and the State have updated, but before the render.
+    * Event called after all the core subsystems and the State have updated, but before the render.
     * Create the deceleration effect.
     */
     Phaser.Plugin.KineticScrolling.prototype.update = function () {
@@ -169,7 +182,7 @@
 
         if (this.autoScrollX && this.amplitudeX != 0) {
 
-            var delta = -this.amplitudeX * Math.exp(-this.elapsed / this.settings.timeConstant);
+            var delta = -this.amplitudeX * Math.exp(-this.elapsed / this.settings.timeConstantScroll);
             if (delta > 0.5 || delta < -0.5) {
                 this.game.camera.x = this.targetX - delta;
             }
@@ -181,7 +194,7 @@
 
         if (this.autoScrollY && this.amplitudeY != 0) {
 
-            var delta = -this.amplitudeY * Math.exp(-this.elapsed / this.settings.timeConstant);
+            var delta = -this.amplitudeY * Math.exp(-this.elapsed / this.settings.timeConstantScroll);
             if (delta > 0.5 || delta < -0.5) {
                 this.game.camera.y = this.targetY - delta;
             }
@@ -191,10 +204,54 @@
             }
         }
 
+        if (this.settings.horizontalWheel && (this.velocityWheelX < -0.1 || this.velocityWheelX > 0.1)) {
+
+            this.game.camera.x -= this.velocityWheelX;
+            this.velocityWheelX *= 0.95;
+        }
+
+        if (this.settings.verticalWheel && (this.velocityWheelY < -0.1 || this.velocityWheelY > 0.1)) {
+
+            this.game.camera.y -= this.velocityWheelY;
+            this.velocityWheelY *= 0.95;
+        }
+    };
+
+    /**
+    * Event called when the mousewheel is used, affect the direction of scrolling.
+    */
+    Phaser.Plugin.KineticScrolling.prototype.mouseWheel = function (event) {
+        if (!this.settings.horizontalWheel && !this.settings.verticalWheel) return;
+
+        event.preventDefault();
+
+        var delta = this.game.input.mouse.wheelDelta * 120 / this.settings.deltaWheel;
+
+        if (this.directionWheel != this.game.input.mouse.wheelDelta) {
+            this.velocityWheelX = 0;
+            this.velocityWheelY = 0;
+            this.directionWheel = this.game.input.mouse.wheelDelta;
+        }
+
+        if (this.settings.horizontalWheel) {
+            this.autoScrollX = false;
+
+            this.targetWheelX = this.game.camera.x + delta;
+            this.velocityWheelX += delta;
+        }
+
+        if (this.settings.verticalWheel) {
+            this.autoScrollY = false;
+
+            this.velocityWheelY += delta;
+        }
+
     };
 
     /**
     * Stop the Plugin.
+    *
+    * @method Phaser.Plugin.KineticScrolling#stop
     */
     Phaser.Plugin.KineticScrolling.prototype.stop = function () {
 
@@ -203,6 +260,8 @@
         this.game.input.deleteMoveCallback(this.callbackID);
 
         this.game.input.onUp.remove(this.endMove, this);
+
+        this.game.input.mouse.mouseWheelCallback = null;
 
     };
 
