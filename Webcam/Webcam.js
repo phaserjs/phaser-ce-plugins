@@ -1,5 +1,6 @@
 /**
 * Provides access to the Webcam (if available)
+* @class Phaser.Plugin.Webcam
 */
 Phaser.Plugin.Webcam = function (game, parent) {
 

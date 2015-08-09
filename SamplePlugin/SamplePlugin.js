@@ -1,5 +1,6 @@
 /**
 * A Sample Plugin demonstrating how to hook into the Phaser plugin system.
+* @class Phaser.Plugin.SamplePlugin
 */
 Phaser.Plugin.SamplePlugin = function (game, parent) {
 

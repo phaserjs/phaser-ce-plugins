@@ -1,5 +1,6 @@
 /**
 * A Virtual Joystick
+* @class Phaser.Plugin.VirtualJoystick
 */
 Phaser.Plugin.VirtualJoystick = function (game, parent) {
 

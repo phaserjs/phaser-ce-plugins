@@ -61,6 +61,7 @@
 */
 
 // constructor for protracker player object
+// @class Phaser.Plugin.ProTracker
 function Protracker()
 {
   var i, t;
