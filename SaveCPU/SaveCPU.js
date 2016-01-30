@@ -70,25 +70,54 @@ Phaser.Plugin.SaveCPU = function (game, parent) {
 };
 Phaser.Plugin.SaveCPU.prototype = Object.create(Phaser.Plugin.prototype);
 Phaser.Plugin.SaveCPU.constructor = Phaser.Plugin.SaveCPU;
-
 Phaser.Plugin.SaveCPU.prototype.init = function () {
     'use strict';
     this.now = window.performance.now();
-    this.renderType = this.game.renderType;
 
     // fps default
     this.renderOnFPS = 30;
     this.renderOnPointerChange = false;
     this.renderDirty = true;
-};
-Phaser.Plugin.SaveCPU.prototype.setRender = function () {
-    'use strict';
-    if (this.renderDirty) {
-        this.game.renderType = this.renderType;
+
+    if(this.game.updateRender) {
+        this.init1();
     } else {
-        this.game.renderType = Phaser.HEADLESS;
+        this.init0();
+    }
+};
+Phaser.Plugin.SaveCPU.prototype.init0 = function () {
+    this.renderType = this.game.renderType;
+    this.setRender = this.setRender0;
+    this.postRender= this.postRender0;
+};
+Phaser.Plugin.SaveCPU.prototype.init1 = function () {
+    var game = this.game;
+
+    game.updateRenderReal = game.updateRender;
+    game.updateRenderNull = function() {};
+
+    this.setRender = this.setRender1;
+    this.postRender= this.postRender1;
+};
+
+Phaser.Plugin.SaveCPU.prototype.setRender0 = function () {
+    'use strict';
+    var game = this.game;
+    if (this.renderDirty) {
+        game.renderType = this.renderType;
+    } else {
+        game.renderType = Phaser.HEADLESS;
     }
     this.renderDirty = false;
+};
+Phaser.Plugin.SaveCPU.prototype.setRender1 = function () {
+    'use strict';
+    var game = this.game;
+    if (this.renderDirty) {
+        game.updateRender = game.updateRenderReal;
+    } else {
+        game.updateRender = game.updateRenderNull;
+    }
 };
 Phaser.Plugin.SaveCPU.prototype.forceRender = function () {
     'use strict';
@@ -136,9 +165,24 @@ Phaser.Plugin.SaveCPU.prototype.postUpdate = function () {
     }
     this.setRender();
 };
-Phaser.Plugin.SaveCPU.prototype.postRender = function () {
+Phaser.Plugin.SaveCPU.prototype.postRender0= function () {
     'use strict';
-    if (this.game._paused) {
-        this.game.renderType = Phaser.HEADLESS;
+    var game = this.game;
+    if (game._paused) {
+        game.renderType = Phaser.HEADLESS;
+    }
+    if (this.renderDirty) {
+        this.renderDirty = false;
     }
 };
+Phaser.Plugin.SaveCPU.prototype.postRender1= function () {
+    'use strict';
+    var game = this.game;
+    if (game._paused) {
+        game.updateRender = game.updateRenderNull;
+    }
+    if (this.renderDirty) {
+        this.renderDirty = false;
+    }
+};
+
