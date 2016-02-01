@@ -64,43 +64,71 @@
 
 Phaser.Plugin.SaveCPU = function (game, parent) {
     'use strict';
-
     Phaser.Plugin.call(this, game, parent);
 
 };
 Phaser.Plugin.SaveCPU.prototype = Object.create(Phaser.Plugin.prototype);
 Phaser.Plugin.SaveCPU.constructor = Phaser.Plugin.SaveCPU;
+ 
 Phaser.Plugin.SaveCPU.prototype.init = function () {
     'use strict';
-    this.now = window.performance.now();
+    var thisObj;
+
+    this.__defineSetter__("renderOnFPS", function(v) {
+        this._renderOnFPS = v;
+        this._tsdiff = (1000 / v);
+    });
+    this.__defineGetter__("renderOnFPS", function() {
+        return this._renderOnFPS;
+    });    
+    this._tsdiff = 0;    
 
     // fps default
     this.renderOnFPS = 30;
     this.renderOnPointerChange = false;
     this.renderDirty = true;
-
+    
     if(this.game.updateRender) {
-        this.init1();
+        this._init1();
     } else {
-        this.init0();
+        this._init0();
     }
+    
+    this.fpsDirty = 0;
+    this.hrts  = 0;
+
+    thisObj = this;
+    window.requestAnimationFrame(function(hrts) {
+        thisObj._trackFPS(hrts);
+    });     
 };
-Phaser.Plugin.SaveCPU.prototype.init0 = function () {
+Phaser.Plugin.SaveCPU.prototype._init0 = function () {
     this.renderType = this.game.renderType;
-    this.setRender = this.setRender0;
-    this.postRender= this.postRender0;
+    this.switchRender = this._switchRender0;
 };
-Phaser.Plugin.SaveCPU.prototype.init1 = function () {
+Phaser.Plugin.SaveCPU.prototype._init1 = function () {
     var game = this.game;
 
     game.updateRenderReal = game.updateRender;
     game.updateRenderNull = function() {};
-
-    this.setRender = this.setRender1;
-    this.postRender= this.postRender1;
+    this.switchRender = this._switchRender1;
 };
+Phaser.Plugin.SaveCPU.prototype._trackFPS = function (hrts) { 
+    var thisObj, diff;
 
-Phaser.Plugin.SaveCPU.prototype.setRender0 = function () {
+    diff = hrts - this.hrts;
+    if (diff > this._tsdiff) {
+        this.fpsDirty = true;
+        this.hrts = hrts;
+    }
+    
+    thisObj = this;
+    window.requestAnimationFrame(function(hrts) {
+        thisObj._trackFPS(hrts);
+    });   
+ 
+};
+Phaser.Plugin.SaveCPU.prototype._switchRender0 = function () {
     'use strict';
     var game = this.game;
     if (this.renderDirty) {
@@ -110,7 +138,7 @@ Phaser.Plugin.SaveCPU.prototype.setRender0 = function () {
     }
     this.renderDirty = false;
 };
-Phaser.Plugin.SaveCPU.prototype.setRender1 = function () {
+Phaser.Plugin.SaveCPU.prototype._switchRender1 = function () {
     'use strict';
     var game = this.game;
     if (this.renderDirty) {
@@ -123,9 +151,11 @@ Phaser.Plugin.SaveCPU.prototype.forceRender = function () {
     'use strict';
     this.renderDirty = true;
 };
-Phaser.Plugin.SaveCPU.prototype.forceRenderOnPointerChange = function () {
+Phaser.Plugin.SaveCPU.prototype._forceRenderOnPointerChange = function () {
     'use strict';
-    
+    if(!this.renderOnPointerChange) {
+        return false;
+    }
     var input = this.game.input;
 
     if (input.oldx !== input.x || input.oldy !== input.y) {
@@ -138,51 +168,30 @@ Phaser.Plugin.SaveCPU.prototype.forceRenderOnPointerChange = function () {
         input.oldDown = input.activePointer.isDown;
     }
 };
-Phaser.Plugin.SaveCPU.prototype.forceRenderOnFPS = function () {
+Phaser.Plugin.SaveCPU.prototype._forceRenderOnFPS = function () {
     'use strict';
     
-    var ts, diff;
-
-    ts = window.performance.now();
-    diff = ts - this.now;
-    if (diff < (1000 / this.renderOnFPS)) {
+    if(this.renderOnFPS && this.fpsDirty) {
+        this.fpsDirty = false;
+        this.forceRender();
+        return true;
+    } else {
         return false;
     }
-    this.now = ts;
-    this.forceRender();
-    return true;
-
 };
 Phaser.Plugin.SaveCPU.prototype.postUpdate = function () {
     'use strict';
-    if (this.renderOnFPS && this.forceRenderOnFPS()) {
-        this.setRender();
+    if (this.renderDirty || this._forceRenderOnFPS()|| this._forceRenderOnPointerChange()) {
+        this.switchRender();
         return;
     }
-    if (this.renderOnPointerChange && this.forceRenderOnPointerChange()) {
-        this.setRender();
-        return;
-    }
-    this.setRender();
 };
-Phaser.Plugin.SaveCPU.prototype.postRender0= function () {
+Phaser.Plugin.SaveCPU.prototype.postRender= function () {
     'use strict';
-    var game = this.game;
-    if (game._paused) {
-        game.renderType = Phaser.HEADLESS;
-    }
     if (this.renderDirty) {
         this.renderDirty = false;
+        this.switchRender();
     }
 };
-Phaser.Plugin.SaveCPU.prototype.postRender1= function () {
-    'use strict';
-    var game = this.game;
-    if (game._paused) {
-        game.updateRender = game.updateRenderNull;
-    }
-    if (this.renderDirty) {
-        this.renderDirty = false;
-    }
-};
+
 
