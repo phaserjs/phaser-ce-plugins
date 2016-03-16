@@ -3,7 +3,7 @@
  * @author       Juan Nicholls <jdnichollsc@hotmail.com>
  * @copyright    2015 Juan Nicholls - http://jdnichollsc.github.io/Phaser-Kinetic-Scrolling-Plugin/
  * @license      {@link http://opensource.org/licenses/MIT}
- * @version 0.1.2
+ * @version 1.0.3
  */
 
 (function (Phaser) {
@@ -158,18 +158,27 @@
 
         this.now = Date.now();
 
-        if (this.velocityX > 10 || this.velocityX < -10) {
+        if (this.game.input.activePointer.withinGame && (this.velocityX > 10 || this.velocityX < -10)) {
             this.amplitudeX = 0.8 * this.velocityX;
             this.targetX = Math.round(this.game.camera.x - this.amplitudeX);
             this.autoScrollX = true;
         }
 
-        if (this.velocityY > 10 || this.velocityY < -10) {
+        if (this.game.input.activePointer.withinGame && (this.velocityY > 10 || this.velocityY < -10)) {
             this.amplitudeY = 0.8 * this.velocityY;
             this.targetY = Math.round(this.game.camera.y - this.amplitudeY);
             this.autoScrollY = true;
         }
 
+        if (!this.game.input.activePointer.withinGame) {
+
+            if (this.settings.horizontalScroll) {
+                this.autoScrollX = true;
+            }
+            if (this.settings.verticalScroll) {
+                this.autoScrollY = true;
+            }
+        }
     };
 
     /**
@@ -204,13 +213,13 @@
             }
         }
 
-        if (this.settings.horizontalWheel && (this.velocityWheelX < -0.1 || this.velocityWheelX > 0.1)) {
+        if (this.settings.horizontalWheel && (this.velocityWheelX < -0.1 || this.velocityWheelX > 0.1 || !this.game.input.activePointer.withinGame)) {
 
             this.game.camera.x -= this.velocityWheelX;
             this.velocityWheelX *= 0.95;
         }
 
-        if (this.settings.verticalWheel && (this.velocityWheelY < -0.1 || this.velocityWheelY > 0.1)) {
+        if (this.settings.verticalWheel && (this.velocityWheelY < -0.1 || this.velocityWheelY > 0.1 || !this.game.input.activePointer.withinGame)) {
 
             this.game.camera.y -= this.velocityWheelY;
             this.velocityWheelY *= 0.95;
@@ -256,7 +265,12 @@
 
         this.game.input.onDown.remove(this.beginMove, this);
 
-        this.game.input.deleteMoveCallback(this.callbackID);
+        if (this.callbackID) {
+            this.game.input.deleteMoveCallback(this.callbackID);
+        }
+        else {
+            this.game.input.deleteMoveCallback(this.moveCamera, this);
+        }
 
         this.game.input.onUp.remove(this.endMove, this);
 
