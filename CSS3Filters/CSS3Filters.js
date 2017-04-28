@@ -29,7 +29,10 @@ Phaser.Plugins.CSS3Filters.prototype = {
 
         if (this.parent)
         {
-            this.parent.style['-webkit-filter'] = prefix + '(' + value + unit + ')';
+						var expr = prefix + '(' + value + unit + ')';
+						
+            this.parent.style.filter = expr;
+            this.parent.style['-webkit-filter'] = expr;
         }
 
     }
