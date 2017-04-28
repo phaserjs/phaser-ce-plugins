@@ -29,7 +29,10 @@ Phaser.Plugins.CSS3Filters.prototype = {
 
         if (this.parent)
         {
-            this.parent.style['-webkit-filter'] = prefix + '(' + value + unit + ')';
+						var expr = prefix + '(' + value + unit + ')';
+						
+            this.parent.style.filter = expr;
+            this.parent.style['-webkit-filter'] = expr;
         }
 
     }
@@ -45,8 +48,10 @@ Object.defineProperty(Phaser.Plugins.CSS3Filters.prototype, "blur", {
 	/**
     * Applies a Gaussian blur to the DOM element. The value of 'radius' defines the value of the standard deviation to the Gaussian function,
     * or how many pixels on the screen blend into each other, so a larger value will create more blur.
-    * If no parameter is provided, then a value 0 is used. The parameter is specified as a CSS length, but does not accept percentage values.
-    */
+    * If no parameter is provided, then a value 0 is used.
+		* @name Phaser.Plugins.CSS3Filters#blur
+    * @property {number} blur - A nonnegative number
+		*/
     set: function (radius) {
         this.setFilter('_blur', 'blur', radius, 'px');
     }
@@ -61,7 +66,9 @@ Object.defineProperty(Phaser.Plugins.CSS3Filters.prototype, "grayscale", {
     * Converts the input image to grayscale. The value of 'amount' defines the proportion of the conversion.
     * A value of 100% is completely grayscale. A value of 0% leaves the input unchanged.
     * Values between 0% and 100% are linear multipliers on the effect. If the 'amount' parameter is missing, a value of 100% is used.
-    */
+    * @name Phaser.Plugins.CSS3Filters#grayscale
+		* @property {number} grayscale - A number within [0, 100]
+		*/
     set: function (amount) {
         this.setFilter('_grayscale', 'grayscale', amount, '%');
     }
@@ -76,7 +83,9 @@ Object.defineProperty(Phaser.Plugins.CSS3Filters.prototype, "sepia", {
     * Converts the input image to sepia. The value of 'amount' defines the proportion of the conversion.
     * A value of 100% is completely sepia. A value of 0 leaves the input unchanged.
     * Values between 0% and 100% are linear multipliers on the effect. If the 'amount' parameter is missing, a value of 100% is used.
-    */
+    * @name Phaser.Plugins.CSS3Filters#sepia
+		* @property {number} sepia - A number within [0, 100]
+		*/
     set: function (amount) {
         this.setFilter('_sepia', 'sepia', amount, '%');
     }
@@ -92,6 +101,8 @@ Object.defineProperty(Phaser.Plugins.CSS3Filters.prototype, "brightness", {
     * A value of 0% will create an image that is completely black. A value of 100% leaves the input unchanged.
     * Other values are linear multipliers on the effect. Values of an amount over 100% are allowed, providing brighter results.
     * If the 'amount' parameter is missing, a value of 100% is used.
+		* @name Phaser.Plugins.CSS3Filters#brightness
+		* @property {number} brightness - A number within [0, 100]
     */
     set: function (amount) {
         this.setFilter('_brightness', 'brightness', amount, '%');
@@ -107,6 +118,8 @@ Object.defineProperty(Phaser.Plugins.CSS3Filters.prototype, "contrast", {
     * Adjusts the contrast of the input. A value of 0% will create an image that is completely black.
     * A value of 100% leaves the input unchanged. Values of amount over 100% are allowed, providing results with less contrast.
     * If the 'amount' parameter is missing, a value of 100% is used.
+		* @name Phaser.Plugins.CSS3Filters#contrast
+		* @property {number} contrast - A number within [0, 100]
     */
     set: function (amount) {
         this.setFilter('_contrast', 'contrast', amount, '%');
@@ -123,6 +136,8 @@ Object.defineProperty(Phaser.Plugins.CSS3Filters.prototype, "hueRotate", {
     * Applies a hue rotation on the input image. The value of 'angle' defines the number of degrees around the color circle
     * the input samples will be adjusted. A value of 0deg leaves the input unchanged. If the 'angle' parameter is missing,
     * a value of 0deg is used. Maximum value is 360deg.
+		* @name Phaser.Plugins.CSS3Filters#hueRotate
+		* @property {number} hueRotate - A number within [0, 360]
     */
     set: function (angle) {
         this.setFilter('_hueRotate', 'hue-rotate', angle, 'deg');
@@ -139,6 +154,8 @@ Object.defineProperty(Phaser.Plugins.CSS3Filters.prototype, "invert", {
     * Inverts the samples in the input image. The value of 'amount' defines the proportion of the conversion.
     * A value of 100% is completely inverted. A value of 0% leaves the input unchanged.
     * Values between 0% and 100% are linear multipliers on the effect. If the 'amount' parameter is missing, a value of 100% is used.
+		* @name Phaser.Plugins.CSS3Filters#invert
+		* @property {number} invert - A number within [0, 100]
     */
     set: function (value) {
         this.setFilter('_invert', 'invert', value, '%');
@@ -157,7 +174,9 @@ Object.defineProperty(Phaser.Plugins.CSS3Filters.prototype, "opacity", {
     * Values between 0% and 100% are linear multipliers on the effect. This is equivalent to multiplying the input image samples by amount.
     * If the 'amount' parameter is missing, a value of 100% is used.
     * This function is similar to the more established opacity property; the difference is that with filters, some browsers provide hardware acceleration for better performance.
-    */
+    * @name Phaser.Plugins.CSS3Filters#opacity
+		* @property {number} opacity - A number within [0, 100]
+		*/
     set: function (value) {
         this.setFilter('_opacity', 'opacity', value, '%');
     }
@@ -174,6 +193,8 @@ Object.defineProperty(Phaser.Plugins.CSS3Filters.prototype, "saturate", {
     * A value of 0% is completely un-saturated. A value of 100% leaves the input unchanged.
     * Other values are linear multipliers on the effect. Values of amount over 100% are allowed, providing super-saturated results.
     * If the 'amount' parameter is missing, a value of 100% is used.
+		* @name Phaser.Plugins.CSS3Filters#saturate
+		* @property {number} saturate - A nonnegative number
     */
     set: function (value) {
         this.setFilter('_saturate', 'saturate', value, '%');
