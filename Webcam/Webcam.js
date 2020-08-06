@@ -39,7 +39,7 @@ Phaser.Plugin.Webcam.prototype.start = function (width, height, context) {
         // Obsolete
         // navigator.getUserMedia( { video: { mandatory: { minWidth: width, minHeight: height } } }, this.connectCallback.bind(this), this.errorCallback.bind(this));
 
-        navigator.getUserMedia({
+        navigator.mediaDevices.getUserMedia({
             video: true
         }).then(stream => {
             this.connectCallback(stream).bind(this);
