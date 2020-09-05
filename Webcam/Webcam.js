@@ -11,7 +11,8 @@ Phaser.Plugin.Webcam = function (game, parent) {
         return false;
     }
 
-    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+    // Obsolete
+    // navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia; 
 
     this.context = null;
     this.stream = null;
@@ -35,7 +36,14 @@ Phaser.Plugin.Webcam.prototype.start = function (width, height, context) {
 
     if (!this.stream)
     {
-        navigator.getUserMedia( { video: { mandatory: { minWidth: width, minHeight: height } } }, this.connectCallback.bind(this), this.errorCallback.bind(this));
+        // Obsolete
+        // navigator.getUserMedia( { video: { mandatory: { minWidth: width, minHeight: height } } }, this.connectCallback.bind(this), this.errorCallback.bind(this));
+
+        navigator.mediaDevices.getUserMedia({
+            video: true
+        }).then(stream => {
+            this.connectCallback(stream).bind(this);
+        }).catch(this.errorCallback.bind(this));
     }
 
 };
@@ -54,7 +62,11 @@ Phaser.Plugin.Webcam.prototype.connectCallback = function (stream) {
 
     this.stream = stream;
 
-    this.video.src = window.URL.createObjectURL(this.stream);
+    // Obsolete
+    // this.video.src = window.URL.createObjectURL(this.stream);
+
+    this.video.srcObject = this.stream;
+    this.video.play();
 
     this.onConnect.dispatch(this.video);
 
